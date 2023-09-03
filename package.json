@@ -1,0 +1,24 @@
+{
+  "name": "tgbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BOBseal/Temp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.61.0",
+    "web3": "^1.6.1",
+    "web3-providers-ws": "^4.0.5"
+  },
+  "bugs": {
+    "url": "https://github.com/BOBseal/Temp/issues"
+  },
+  "homepage": "https://github.com/BOBseal/Temp#readme"
+}
