@@ -219,47 +219,60 @@ bot.on('text', async (msg) => {
         }
     }
     
+    // ...
+
+else if (userState.action === 'lock') {
     
-    else if (userState.action === 'lock') {
-        userState.walletAddress = msg.text.trim();
-        const actionText =  'locking';
-        bot.sendMessage(chatId, `Please enter the token address for ${actionText}:`);
-    } else if (!userState.tokenAddress) {
+   
+    userState.walletAddress = msg.text.trim();
+    
+
+    if(!userState.tokenAddress) {
+        bot.sendMessage(chatId, `Please enter the token address for locking:`);
         userState.tokenAddress = msg.text.trim();
-        bot.sendMessage(chatId, 'Please enter the amount:');
-    } else if (!userState.amount) {
-        userState.amount = msg.text.trim();
-        bot.sendMessage(chatId, 'Please enter the lock duration (in days):');
-    } else if (!userState.lockDays) {
-        userState.lockDays = msg.text.trim();
-
-        // All required information for locking or unlocking tokens has been collected
-        const { walletAddress, tokenAddress, amount, lockDays, action, chainId } = userState;
-        const frontEndURL = 'https://example.com'; // Replace with your actual front end URL
-
-        try {
-            // Send the data to your front-end URL
-            const response = await axios.post(frontEndURL, {
-                chainId,
-                userWalletAddress: walletAddress,
-                tokenAddress,
-                amount,
-                lockDurationInDays: lockDays,
-                action, // Include the action in the data
-            });
-
-            // Generate a confirmation link
-            const confirmationLink = `${frontEndURL}/route/${chainId}/${walletAddress}/${tokenAddress}/${amount}/${lockDays}`;
-
-            // Respond to the user with the confirmation link
-            bot.sendMessage(chatId, `Tokens ${action} successfully. Confirm your transaction: ${confirmationLink}`);
-        } catch (error) {
-            bot.sendMessage(chatId, `Error ${action} tokens: ${error.message}`);
-        } finally {
-            // Clear the user state after the interaction is complete
-            userStates.delete(userId);
-        }
+        
     }
+  else if (!userState.amount) {
+    bot.sendMessage(chatId, 'Please enter the amount:');
+    userState.amount = msg.text.trim();
+   
+   
+} else if (!userState.lockDays) {
+    bot.sendMessage(chatId, 'Please enter the lock duration (in days):');
+    userState.lockDays = msg.text.trim();
+   
+} else if (userState.lockDays) {
+   
+
+    // All required information for locking or unlocking tokens has been collected
+    const { walletAddress, tokenAddress, amount, lockDays, action, chainId } = userState;
+    const frontEndURL = 'https://example.com'; // Replace with your actual front end URL
+
+    try {
+        // Send the data to your front-end URL
+        const response = await axios.post(frontEndURL, {
+            chainId,
+            userWalletAddress: walletAddress,
+            tokenAddress,
+            amount,
+            lockDurationInDays: lockDays,
+            action, // Include the action in the data
+        });
+
+        // Generate a confirmation link
+        const confirmationLink = `${frontEndURL}/route/${chainId}/${walletAddress}/${tokenAddress}/${amount}/${lockDays}`;
+
+        // Respond to the user with the confirmation link
+        bot.sendMessage(chatId, `Tokens ${action} successfully. Confirm your transaction: ${confirmationLink}`);
+    } catch (error) {
+        bot.sendMessage(chatId, `Error ${action} tokens: ${error.message}`);
+    } finally {
+        // Clear the user state after the interaction is complete
+        userStates.delete(userId);
+    }
+}
+} 
+
 });
 
 // Rest of your bot code
