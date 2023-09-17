@@ -127,10 +127,14 @@ bot.on('callback_query', async (callbackQuery) => {
         // For mintToken action, proceed to token details
         userState.step = 'selectTokenDetails';
         bot.sendMessage(chatId, 'Please enter the token name:');
-    } else {
+    } else if(userState.action === 'unlock') {
         // For lock and unlock actions, proceed to the next step (selecting wallet address)
         userState.step = 'selectWalletAddress';
-        bot.sendMessage(chatId, 'Please enter your wallet address for locking/unlocking:');
+        bot.sendMessage(chatId, 'Please enter your wallet address for unlocking:');
+    } else if(userState.action === 'lock') {
+        // For lock and unlock actions, proceed to the next step (selecting wallet address)
+        userState.step = 'selectWalletAddress';
+        bot.sendMessage(chatId, 'Please enter your wallet address for locking:');
     }
 });
 
@@ -182,9 +186,43 @@ bot.on('text', async (msg) => {
                 }
             }
         }
-    } else if (!userState.walletAddress) {
+    }  else if (userState.action === 'unlock') {
         userState.walletAddress = msg.text.trim();
-        const actionText = userState.action === 'lock' ? 'locking' : 'unlocking';
+    
+        // Move the following block inside the 'unlock' action block
+        if (!userState.key) {
+            bot.sendMessage(chatId, 'Please enter the key:');
+            userState.key = msg.text.trim();
+        } else if (userState.key) {
+            const { walletAddress, key, action, chainId } = userState;
+            const frontEndURL = 'https://example.com';
+            try {
+                // Send the data to your front-end URL
+                const response = await axios.post(frontEndURL, {
+                    chainId,
+                    userWalletAddress: walletAddress,
+                    key,
+                    action, // Include the action in the data
+                });
+    
+                // Generate a confirmation link
+                const confirmationLink = `${frontEndURL}/route/${chainId}/${walletAddress}/${key}`;
+    
+                // Respond to the user with the confirmation link
+                bot.sendMessage(chatId, `Tokens ${action} successfully. Confirm your transaction: ${confirmationLink}`);
+            } catch (error) {
+                bot.sendMessage(chatId, `Error ${action} tokens: ${error.message}`);
+            } finally {
+                // Clear the user state after the interaction is complete
+                userStates.delete(userId);
+            }
+        }
+    }
+    
+    
+    else if (userState.action === 'lock') {
+        userState.walletAddress = msg.text.trim();
+        const actionText =  'locking';
         bot.sendMessage(chatId, `Please enter the token address for ${actionText}:`);
     } else if (!userState.tokenAddress) {
         userState.tokenAddress = msg.text.trim();
